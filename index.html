@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TCG 카드 메이커 (포켓몬 · 유희왕)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1>TCG 카드 메이커</h1>
+    <p class="subtitle">사진을 찍거나 업로드해서 나만의 포켓몬 / 유희왕 카드를 만들어보세요</p>
+  </header>
+
+  <main class="layout">
+    <section class="editor">
+      <div class="panel">
+        <h2>1. 카드 스타일</h2>
+        <label class="big-label">
+          <select id="card-style">
+            <option value="pokemon">포켓몬</option>
+            <option value="yugioh">유희왕</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="panel">
+        <h2>2. 사진</h2>
+        <div class="image-buttons">
+          <button id="btn-camera" type="button">📷 카메라 열기</button>
+          <label class="file-button">
+            📁 파일 업로드
+            <input type="file" id="file-input" accept="image/*" hidden />
+          </label>
+        </div>
+
+        <div class="camera-stage" id="camera-stage" hidden>
+          <video id="camera-video" autoplay playsinline muted></video>
+          <div class="camera-controls">
+            <button id="btn-capture" type="button">📸 촬영</button>
+            <button id="btn-cancel-camera" type="button" class="ghost">취소</button>
+          </div>
+        </div>
+
+        <div class="ai-section">
+          <label class="ai-toggle">
+            <input type="checkbox" id="ai-toggle" />
+            <span><strong>AI로 카드 스타일 일러스트로 변환</strong></span>
+          </label>
+          <details class="api-key-details">
+            <summary>OpenAI API 키 설정</summary>
+            <input type="password" id="api-key" placeholder="sk-..." autocomplete="off" />
+            <p class="hint">키는 이 브라우저(localStorage)에만 저장됩니다. 서버를 거치지 않고 OpenAI로 직접 요청됩니다.</p>
+          </details>
+          <div id="ai-status" class="ai-status" hidden></div>
+        </div>
+      </div>
+
+      <div class="panel" data-style="pokemon">
+        <h2>3. 포켓몬 카드 정보</h2>
+
+        <div class="form-row three">
+          <label>이름
+            <input type="text" id="name" value="피카츄" />
+          </label>
+          <label>HP
+            <input type="number" id="hp" value="60" min="10" max="990" step="10" />
+          </label>
+          <label>타입
+            <select id="type">
+              <option value="lightning" selected>번개 ⚡</option>
+              <option value="fire">불 🔥</option>
+              <option value="water">물 💧</option>
+              <option value="grass">풀 🌿</option>
+              <option value="psychic">심리 🔮</option>
+              <option value="fighting">격투 👊</option>
+              <option value="darkness">악 🌑</option>
+              <option value="metal">강철 ⚙️</option>
+              <option value="fairy">페어리 🧚</option>
+              <option value="dragon">드래곤 🐉</option>
+              <option value="colorless">노말 ⭐</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>기술 1</legend>
+          <div class="form-row three">
+            <label>에너지
+              <input type="text" id="atk1-cost" value="⚡⭐" />
+            </label>
+            <label>이름
+              <input type="text" id="atk1-name" value="전기 충격" />
+            </label>
+            <label>데미지
+              <input type="text" id="atk1-damage" value="20" />
+            </label>
+          </div>
+          <label>설명
+            <textarea id="atk1-desc" rows="2">동전을 던져 앞면이 나오면 상대를 마비시킨다.</textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>기술 2 (선택)</legend>
+          <div class="form-row three">
+            <label>에너지
+              <input type="text" id="atk2-cost" placeholder="⚡⚡⭐" />
+            </label>
+            <label>이름
+              <input type="text" id="atk2-name" placeholder="볼트 태클" />
+            </label>
+            <label>데미지
+              <input type="text" id="atk2-damage" placeholder="90" />
+            </label>
+          </div>
+          <label>설명
+            <textarea id="atk2-desc" rows="2" placeholder="이 포켓몬도 30 데미지를 입는다."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>약점 / 저항력 / 후퇴</legend>
+          <div class="form-row three">
+            <label>약점
+              <input type="text" id="weakness" value="격투 ×2" />
+            </label>
+            <label>저항력
+              <input type="text" id="resistance" value="강철 -20" />
+            </label>
+            <label>후퇴 비용
+              <input type="text" id="retreat" value="⭐" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>일러스트레이터 / 세트 번호</legend>
+          <div class="form-row two">
+            <label>일러스트레이터
+              <input type="text" id="illustrator" placeholder="예: Mitsuhiro Arita" />
+            </label>
+            <label>세트 번호
+              <input type="text" id="set-number" value="025/151" />
+            </label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="panel" data-style="yugioh" hidden>
+        <h2>3. 유희왕 카드 정보</h2>
+
+        <div class="form-row two">
+          <label>이름
+            <input type="text" id="y-name" value="푸른 눈의 백룡" />
+          </label>
+          <label>카드 종류
+            <select id="y-frame">
+              <option value="normal">일반 몬스터 (Normal)</option>
+              <option value="effect">효과 몬스터 (Effect)</option>
+              <option value="ritual">의식 몬스터 (Ritual)</option>
+              <option value="fusion">융합 몬스터 (Fusion)</option>
+              <option value="synchro">싱크로 몬스터 (Synchro)</option>
+              <option value="xyz">엑시즈 몬스터 (Xyz)</option>
+              <option value="link">링크 몬스터 (Link)</option>
+              <option value="spell">마법 카드 (Spell)</option>
+              <option value="trap">함정 카드 (Trap)</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset id="y-monster-fields">
+          <legend>몬스터 정보</legend>
+          <div class="form-row three">
+            <label>속성
+              <select id="y-attribute">
+                <option value="light" selected>빛 (LIGHT)</option>
+                <option value="dark">어둠 (DARK)</option>
+                <option value="earth">땅 (EARTH)</option>
+                <option value="water">물 (WATER)</option>
+                <option value="fire">불 (FIRE)</option>
+                <option value="wind">바람 (WIND)</option>
+                <option value="divine">신 (DIVINE)</option>
+              </select>
+            </label>
+            <label>레벨 / 랭크
+              <input type="number" id="y-level" value="8" min="0" max="12" step="1" />
+            </label>
+            <label>종족
+              <input type="text" id="y-race" value="드래곤족" />
+            </label>
+          </div>
+          <div class="form-row two">
+            <label>ATK
+              <input type="text" id="y-atk" value="3000" />
+            </label>
+            <label>DEF
+              <input type="text" id="y-def" value="2500" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>효과 / 플레이버 텍스트</legend>
+          <label>
+            <textarea id="y-effect" rows="5">높은 공격력을 자랑하는 전설의 드래곤. 어떤 상대도 꺾어버리는 그 모습은 보는 이를 압도한다.</textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>카드 번호</legend>
+          <label>
+            <input type="text" id="y-card-no" value="LOB-KR001" />
+          </label>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="preview">
+      <h2>미리보기</h2>
+      <div class="canvas-wrap">
+        <canvas id="card-canvas" width="600" height="840"></canvas>
+      </div>
+      <button id="btn-download" type="button" class="primary">💾 PNG로 저장</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
